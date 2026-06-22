@@ -222,8 +222,11 @@
                 <div class="file-icon" style="font-size: 2.5rem; color: #cbd5e1;">📄</div>
                 <div class="file-info">
                   <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="file-name" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ f.file_name }}</a>
-                  <span class="file-meta" style="font-size: 0.85rem;">Yükleyen: {{ f.uploader_name }} • {{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
-                  <p class="file-desc-text" *ngIf="f.description" style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #475569;">{{ f.description }}</p>
+                  <div class="file-meta">
+                    <span>Yükleyen: <strong>{{ f.uploader_name }}</strong></span>
+                    <span class="file-date-badge">{{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
+                  </div>
+                  <p class="file-desc-text" *ngIf="f.description" style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--color-text-muted);">{{ f.description }}</p>
                 </div>
               </div>
               <button class="btn-danger btn-sm" style="border-radius: 20px; padding: 0.4rem 1rem; font-weight: 600;" *ngIf="isOwner || f.uploaded_by === currentUserId" (click)="deleteFile(f)" title="Dosyayı Sil">Sil</button>
@@ -301,9 +304,12 @@
                 <div style="display: flex; gap: 1rem; align-items: center;">
                   <div class="file-icon" style="font-size: 2.5rem; color: #cbd5e1;">📄</div>
                   <div class="file-info">
-                    <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="file-name" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ f.file_name }}</a>
-                    <span class="file-meta" style="font-size: 0.85rem;">Teslim Eden: <strong>{{ f.uploader_name }}</strong> • {{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
-                    <p class="file-desc-text" *ngIf="f.description" style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #475569;">{{ f.description }}</p>
+                  <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="file-name" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ f.file_name }}</a>
+                  <div class="file-meta">
+                    <span>Teslim Eden: <strong>{{ f.uploader_name }}</strong></span>
+                    <span class="file-date-badge">{{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
+                  </div>
+                  <p class="file-desc-text" *ngIf="f.description" style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--color-text-muted);">{{ f.description }}</p>
                   </div>
                 </div>
                 <button class="btn-danger btn-sm" style="border-radius: 20px; padding: 0.4rem 1rem; font-weight: 600;" (click)="deleteFile(f)" title="Dosyayı Sil">Sil</button>

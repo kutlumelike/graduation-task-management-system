@@ -51,9 +51,9 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     let name = req.body.originalFileName || file.originalname;
     try { 
-      // multer / busboy form alanlarını ve başlıkları latin1 olarak okur.
-      // Tarayıcıdan gelen UTF-8 bytelarını düzgün karaktere çeviriyoruz.
-      name = Buffer.from(name, 'latin1').toString('utf8'); 
+      // Frontend encodeURIComponent ile encode ederek gönderiyor,
+      // burada decodeURIComponent ile orijinal Türkçe karakterlere dönüştürüyoruz.
+      name = decodeURIComponent(name); 
     } catch(e) {}
     cb(null, Date.now() + '-' + name.replace(/\s+/g, '_'));
   }
@@ -658,6 +658,37 @@ app.get('/workspaces/:id/activity', authenticateToken, wsMemberAccess, async (re
     res.status(500).json({ error: 'Aktivite logu alınamadı' });
   }
 });
+
+// DELETE ALL ACTIVITY LOG (owner only)
+app.delete('/workspaces/:id/activity', authenticateToken, wsOwnerOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM WorkspaceActivityLog WHERE workspace_id = $1', [id]);
+    res.json({ message: 'Tüm aktiviteler temizlendi' });
+  } catch (error) {
+    res.status(500).json({ error: 'Aktiviteler temizlenemedi' });
+  }
+});
+
+// DELETE SINGLE ACTIVITY LOG
+app.delete('/workspaces/:id/activity/:activityId', authenticateToken, wsMemberAccess, async (req, res) => {
+  try {
+    const { id, activityId } = req.params;
+    
+    // Check ownership or if admin
+    const checkRes = await pool.query('SELECT user_id FROM WorkspaceActivityLog WHERE id = $1 AND workspace_id = $2', [activityId, id]);
+    if (checkRes.rowCount === 0) return res.status(404).json({ error: 'Aktivite bulunamadı' });
+    
+    if (req.workspaceRole !== 'owner' && checkRes.rows[0].user_id !== req.user.userId) {
+      return res.status(403).json({ error: 'Bu aktiviteyi silme yetkiniz yok' });
+    }
+
+    await pool.query('DELETE FROM WorkspaceActivityLog WHERE id = $1', [activityId]);
+    res.json({ message: 'Aktivite silindi' });
+  } catch (error) {
+    res.status(500).json({ error: 'Aktivite silinemedi' });
+  }
+});
 // --- WORKSPACE MEMBERS ---
 app.get('/workspaces/:id/members', authenticateToken, wsMemberAccess, async (req, res) => {
   try {
@@ -752,11 +783,11 @@ app.post('/workspaces/:id/upload', authenticateToken, wsMemberAccess, upload.sin
     const { description, originalFileName } = req.body;
     const filePath = `/uploads/${filename}`;
     
-    // Tarayıcıdan Form verisi olarak gönderilen veya Multer'dan gelen adı al, latin1'den UTF-8'e dönüştür.
-    // Busboy multipart/form-data içindeki metinleri ve başlıkları varsayılan olarak latin1 okur.
+    // Frontend encodeURIComponent ile encode ederek gönderiyor,
+    // burada decodeURIComponent ile orijinal Türkçe karakterlere dönüştürüyoruz.
     let finalFileName = originalFileName || originalname;
     try {
-      finalFileName = Buffer.from(finalFileName, 'latin1').toString('utf8');
+      finalFileName = decodeURIComponent(finalFileName);
     } catch(e) {}
 
     const result = await pool.query(
@@ -1184,9 +1215,15 @@ app.post('/tasks/:id/upload', authenticateToken, upload.single('file'), async (r
     const { originalname, filename, mimetype } = req.file;
     const filePath = `/uploads/${filename}`;
 
+    // Frontend encodeURIComponent ile encode ederek gönderiyor
+    let finalFileName = req.body.originalFileName || originalname;
+    try {
+      finalFileName = decodeURIComponent(finalFileName);
+    } catch(e) {}
+
     const result = await pool.query(
       "INSERT INTO Files (task_id, file_name, file_path, file_type) VALUES ($1, $2, $3, $4) RETURNING *",
-      [id, originalname, filePath, mimetype]
+      [id, finalFileName, filePath, mimetype]
     );
 
     res.status(201).json(result.rows[0]);

@@ -20,6 +20,7 @@ export class FileService {
 
   uploadFile(taskId: number, file: File): Observable<TaskFile> {
     const formData = new FormData();
+    formData.append('originalFileName', encodeURIComponent(file.name));
     formData.append('file', file);
     
     // Note: HttpHeaders shouldn't set Content-Type for FormData, browser does it automatically with boundary

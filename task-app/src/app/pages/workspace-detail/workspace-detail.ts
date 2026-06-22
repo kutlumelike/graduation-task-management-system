@@ -151,6 +151,44 @@ export class WorkspaceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  deleteActivity(activity: WorkspaceActivity): void {
+    if (!this.workspace?.id || !activity.id) return;
+    
+    // Yalnızca owner veya kendi aktivitesi ise silebilir
+    if (!this.isOwner && activity.user_id !== this.currentUserId) {
+      this.showToast('Bu aktiviteyi silme yetkiniz yok.');
+      return;
+    }
+
+    if (confirm('Bu aktiviteyi silmek istediğinize emin misiniz?')) {
+      this.workspaceService.deleteActivity(this.workspace.id, activity.id).subscribe({
+        next: () => {
+          this.showToast('Aktivite başarıyla silindi ✓');
+          this.loadActivityLog(this.workspace!.id!);
+        },
+        error: () => this.showToast('Aktivite silinemedi.')
+      });
+    }
+  }
+
+  clearActivities(): void {
+    if (!this.workspace?.id) return;
+    if (!this.isOwner) {
+      this.showToast('Tüm aktiviteleri sadece yönetici temizleyebilir.');
+      return;
+    }
+
+    if (confirm('Tüm aktivite geçmişini temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+      this.workspaceService.clearAllActivities(this.workspace.id).subscribe({
+        next: () => {
+          this.showToast('Tüm aktiviteler temizlendi ✓');
+          this.loadActivityLog(this.workspace!.id!);
+        },
+        error: () => this.showToast('Aktiviteler temizlenemedi.')
+      });
+    }
+  }
+
   setTab(tab: 'stream' | 'tasks' | 'members' | 'files' | 'submissions' | 'activity'): void {
     this.activeTab = tab;
     if (tab === 'activity' && this.workspace?.id) {
@@ -317,21 +355,33 @@ export class WorkspaceDetailComponent implements OnInit, OnDestroy {
   // --- Files ---
   onFileSelected(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      this.selectedFile = file;
-    } else {
-      this.errorMessage = 'Sadece PDF dosyaları yüklenebilir.';
-      this.selectedFile = null;
+    if (file) {
+      const allowedExtensions = ['.pdf', '.doc', '.docx', '.ppt', '.pptx'];
+      const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      
+      if (allowedExtensions.includes(fileExt)) {
+        this.selectedFile = file;
+        this.errorMessage = '';
+      } else {
+        this.errorMessage = 'Sadece PDF, Word ve PowerPoint dosyaları yüklenebilir.';
+        this.selectedFile = null;
+      }
     }
   }
 
   onSubmissionFileSelected(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      this.selectedSubmissionFile = file;
-    } else {
-      this.errorMessage = 'Sadece PDF dosyaları yüklenebilir.';
-      this.selectedSubmissionFile = null;
+    if (file) {
+      const allowedExtensions = ['.pdf', '.doc', '.docx', '.ppt', '.pptx'];
+      const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      
+      if (allowedExtensions.includes(fileExt)) {
+        this.selectedSubmissionFile = file;
+        this.errorMessage = '';
+      } else {
+        this.errorMessage = 'Sadece PDF, Word ve PowerPoint dosyaları yüklenebilir.';
+        this.selectedSubmissionFile = null;
+      }
     }
   }
 

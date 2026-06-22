@@ -55,6 +55,14 @@ export class WorkspaceService {
     return this.http.get<WorkspaceActivity[]>(`${this.apiUrl}/${workspaceId}/activity`, { headers: this.getAuthHeaders() });
   }
 
+  deleteActivity(workspaceId: number, activityId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${workspaceId}/activity/${activityId}`, { headers: this.getAuthHeaders() });
+  }
+
+  clearAllActivities(workspaceId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${workspaceId}/activity`, { headers: this.getAuthHeaders() });
+  }
+
   // --- Members ---
   getMembers(workspaceId: number): Observable<WorkspaceMember[]> {
     return this.http.get<WorkspaceMember[]>(`${this.apiUrl}/${workspaceId}/members`, { headers: this.getAuthHeaders() });
@@ -85,7 +93,7 @@ export class WorkspaceService {
   uploadPdf(workspaceId: number, file: File, description?: string): Observable<WorkspaceFile> {
     const formData = new FormData();
     // Dosya adını ayrı alan olarak İLK gönder (Multer parse ederken req.body'ye düşmesi için)
-    formData.append('originalFileName', file.name);
+    formData.append('originalFileName', encodeURIComponent(file.name));
     if (description) formData.append('description', description);
     formData.append('file', file);
     return this.http.post<WorkspaceFile>(

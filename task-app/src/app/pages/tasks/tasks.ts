@@ -326,7 +326,13 @@ export class TasksComponent implements OnInit, OnDestroy {
       this.newTaskPriority = task.priority || 'Medium';
       this.newTaskCategory = task.category || 'General';
       this.newTaskAssignTo = task.userid || null;
-      this.newTaskReminder = task.reminder_date ? new Date(task.reminder_date).toISOString().slice(0, 16) : '';
+      if (task.reminder_date) {
+        const d = new Date(task.reminder_date);
+        const tzOffset = d.getTimezoneOffset() * 60000;
+        this.newTaskReminder = new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+      } else {
+        this.newTaskReminder = '';
+      }
     } else {
       this.editingTaskId = null;
       this.newTaskTitle = '';
@@ -400,6 +406,7 @@ export class TasksComponent implements OnInit, OnDestroy {
         next: (updated) => {
           this.handleFileUpload(updated.id!);
           this.addActivity(`Görev güncellendi: "${this.newTaskTitle}"`);
+          if (this.newTaskReminder) alert('Hatırlatıcı başarıyla güncellendi!');
           this.closeModal();
           this.loadTasks();
         },
@@ -413,6 +420,7 @@ export class TasksComponent implements OnInit, OnDestroy {
         next: (created) => {
           this.handleFileUpload(created.id!);
           this.addActivity(`Yeni görev oluşturuldu: "${this.newTaskTitle}"`);
+          if (this.newTaskReminder) alert('Hatırlatıcı başarıyla oluşturuldu!');
           this.closeModal();
           this.loadTasks();
         },

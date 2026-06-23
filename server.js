@@ -1347,8 +1347,8 @@ app.put('/admin/users/:id/role', authenticateToken, authorizeRoles('admin'), asy
   }
 });
 
-// BİLDİRİM VE HATIRLATICI CRON JOB'U (Her saat başı çalışır)
-cron.schedule('0 * * * *', async () => {
+// BİLDİRİM VE HATIRLATICI CRON JOB'U (Her dakika çalışır)
+cron.schedule('* * * * *', async () => {
   try {
     log.info('🕒 Gecikmiş görev ve hatırlatıcı kontrolü yapılıyor...');
     const now = new Date();
@@ -1373,10 +1373,10 @@ cron.schedule('0 * * * *', async () => {
       }
     }
     
-    // Yaklaşan hatırlatıcılar için (şu an ile 1 saat sonrası arası reminder_date olanlar)
+    // Yaklaşan hatırlatıcılar için (zamanı gelmiş olanlar)
     const reminderRes = await pool.query(`
       SELECT id, title, userid FROM Tasks 
-      WHERE reminder_date >= NOW() AND reminder_date <= NOW() + INTERVAL '1 hour' AND status != 'Tamamlandı'
+      WHERE reminder_date <= NOW() AND status != 'Tamamlandı'
     `);
     
     for (const task of reminderRes.rows) {
@@ -1387,7 +1387,7 @@ cron.schedule('0 * * * *', async () => {
       if (existingNotif.rowCount === 0) {
         await pool.query(
           "INSERT INTO Notifications (user_id, task_id, message, type) VALUES ($1, $2, $3, 'reminder')",
-          [task.userid, task.id, `Hatırlatıcı: "${task.title}" için zaman yaklaşıyor.`]
+          [task.userid, task.id, `Hatırlatıcı: "${task.title}" zamanı geldi!`]
         );
       }
     }

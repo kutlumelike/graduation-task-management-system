@@ -19,7 +19,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [FormsModule, CommonModule, NotificationBellComponent, NavbarComponent, EmptyStateComponent],
+  imports: [FormsModule, CommonModule, NavbarComponent, EmptyStateComponent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css'
 })

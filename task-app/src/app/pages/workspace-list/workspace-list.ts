@@ -13,7 +13,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 @Component({
   selector: 'app-workspace-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NotificationBellComponent, NavbarComponent, PageHeaderComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent, PageHeaderComponent, EmptyStateComponent],
   templateUrl: './workspace-list.html',
   styleUrl: './workspace-list.css'
 })

@@ -42,7 +42,7 @@
   display: flex;
 }
 
-.brand-logo {
+.auth-brand-logo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -53,7 +53,7 @@
   justify-content: center;
 }
 
-.brand-logo svg {
+.auth-brand-logo svg {
   width: 28px;
   height: 28px;
   color: var(--color-primary);

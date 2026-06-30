@@ -7,8 +7,10 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { Task } from '../../models/task.model';
 import { WorkspaceTask } from '../../models/workspace.model';
 import { NotificationBellComponent } from '../../components/notification-bell/notification-bell.component';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
+
 
 export interface CalendarEvent {
   id: number;
@@ -26,7 +28,7 @@ export interface CalendarEvent {
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, FormsModule, NotificationBellComponent, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './calendar.html',
   styleUrl: './calendar.css'
 })

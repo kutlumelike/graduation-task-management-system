@@ -1,0 +1,28 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <h2>GörevYönetimi <span class="role-badge" [ngClass]="getRoleBadgeClass()">{{ userRole | uppercase }}</span></h2>
+    <div class="nav-links" style="margin-left: 2rem;">
+      <button class="btn-ghost" [class.active]="activeTab === 'tasks'" (click)="goToTasks()">Kişisel</button>
+      <button class="btn-ghost" [class.active]="activeTab === 'workspaces'" (click)="goToWorkspaces()">Çalışma Alanları (Workspaces)</button>
+      <button class="btn-ghost" [class.active]="activeTab === 'calendar'" (click)="goToCalendar()">Takvim</button>
+    </div>
+  </div>
+
+  <div class="nav-user">
+    <div class="nav-actions">
+      <app-notification-bell></app-notification-bell>
+    </div>
+
+    <div class="user-avatar" (click)="openSession.emit()" style="cursor:pointer;" title="Oturumları Yönet">
+      {{ userName.charAt(0) || 'U' }}
+    </div>
+    <span class="user-name">{{ userName }}</span>
+    <button class="btn-logout" (click)="logout()">Çıkış Yap</button>
+  </div>
+</nav>

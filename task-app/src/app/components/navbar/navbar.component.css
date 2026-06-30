@@ -1,0 +1,31 @@
+/* Navbar component uses global styles from styles.css */
+/* However, scoped elements like `.navbar` can be styled here. */
+.navbar {
+  background: rgba(255,255,255,0.92);
+  z-index: 100;
+}
+
+.nav-brand h2 {
+  font-size: var(--font-base);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-main);
+  letter-spacing: -0.02em;
+}
+
+.role-badge {
+  font-size: var(--font-xs);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-2);
+  vertical-align: middle;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  font-weight: 600;
+}
+
+/* Include any specific styling for navbar elements that was duplicated across pages */
+.badge-admin { background: var(--color-danger-light); color: var(--color-danger); border-color: rgba(239,68,68,0.2); }
+.badge-manager { background: var(--color-warning-light); color: var(--color-warning); border-color: rgba(245,158,11,0.2); }
+.badge-user { background: var(--color-info-light); color: var(--color-info); border-color: rgba(59,130,246,0.2); }

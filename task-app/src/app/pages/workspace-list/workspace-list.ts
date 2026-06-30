@@ -6,18 +6,21 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { AuthService } from '../../services/auth.service';
 import { Workspace, WorkspaceMember } from '../../models/workspace.model';
 import { NotificationBellComponent } from '../../components/notification-bell/notification-bell.component';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-workspace-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NotificationBellComponent],
+  imports: [CommonModule, FormsModule, RouterModule, NotificationBellComponent, NavbarComponent, PageHeaderComponent, EmptyStateComponent],
   templateUrl: './workspace-list.html',
   styleUrl: './workspace-list.css'
 })
 export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspaces: Workspace[] = [];
   userRole: string = 'user';
-  isDarkMode: boolean = false;
+
   
   showCreateModal: boolean = false;
   showJoinModal: boolean = false;
@@ -40,10 +43,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userRole = this.authService.getRole();
-    if (localStorage.getItem('theme') === 'dark') {
-      this.isDarkMode = true;
-      document.body.classList.add('dark-theme');
-    }
     this.loadWorkspaces();
   }
 
@@ -97,9 +96,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     });
   }
 
-  goToDashboard(): void {
-    this.router.navigate(['/tasks']);
-  }
 
   goToWorkspace(id: number | undefined): void {
     if (id) {
@@ -119,16 +115,5 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.toastMessage = msg;
     this.toastVisible = true;
     this.toastTimer = setTimeout(() => { this.toastVisible = false; }, 3000);
-  }
-
-  toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    if (this.isDarkMode) {
-      document.body.classList.add('dark-theme');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-theme');
-      localStorage.setItem('theme', 'light');
-    }
   }
 }

@@ -30,7 +30,7 @@
         </div>
         <div class="notif-content">
           <p>{{ notif.message }}</p>
-          <span class="notif-ws-name" *ngIf="notif.workspace_name" style="font-size: 0.75rem; font-weight: 600; color: #3b82f6; display: block; margin-top: 2px;">{{ notif.workspace_name }}</span>
+          <span class="notif-ws-name" *ngIf="notif.workspace_name">{{ notif.workspace_name }}</span>
           <span class="notif-time">{{ notif.created_at | date:'dd MMM HH:mm' }}</span>
         </div>
         <div class="notif-dot" *ngIf="!notif.is_read"></div>

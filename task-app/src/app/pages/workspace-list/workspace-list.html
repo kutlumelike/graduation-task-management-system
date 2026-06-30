@@ -1,73 +1,75 @@
-<div class="dashboard-wrapper" [class.dark-mode]="isDarkMode">
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-brand">
-      <div class="brand-logo" (click)="goToDashboard()" style="cursor: pointer;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-      </div>
-      <h2>GörevYönetimi</h2>
-      <div class="nav-links" style="margin-left: 2rem;">
-        <button class="btn-ghost" (click)="goToDashboard()">Kişisel</button>
-        <button class="btn-ghost active">Çalışma Alanları (Workspaces)</button>
-      </div>
-    </div>
-    
-    <div class="nav-user">
-      <div class="nav-actions">
-        <!-- Dark Mode Toggle -->
-        <button class="icon-btn" (click)="toggleTheme()" title="Temayı Değiştir">
-          <svg *ngIf="!isDarkMode" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-          <svg *ngIf="isDarkMode" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        </button>
-        <button class="btn-primary" (click)="showJoinModal = true">Çalışma Alanına Katıl</button>
-        <button class="btn-primary" (click)="showCreateModal = true">Çalışma Alanı Oluştur</button>
-        <app-notification-bell></app-notification-bell>
-      </div>
-    </div>
-  </nav>
+<div class="dashboard-wrapper">
+  <app-navbar activeTab="workspaces"></app-navbar>
 
   <main class="dashboard-main" style="grid-template-columns: 1fr;">
-    <div class="main-content">
+    <div class="main-content page-enter">
       <div class="error-text" *ngIf="errorMessage">{{ errorMessage }}</div>
       
-      <div class="empty-state" *ngIf="workspaces.length === 0">
-        <h3>Henüz bir çalışma alanına katılmadınız.</h3>
-        <p>Sağ üstteki butona tıklayarak bir davet kodu ile çalışma alanına katılın veya yeni bir çalışma alanı oluşturun.</p>
-      </div>
+      <!-- Hero / Page Header -->
+      <app-page-header
+        title="Çalışma Alanları"
+        subtitle="Ekiplerinizi, sınıflarınızı ve projelerinizi tek yerden yönetin."
+        iconColor="blue">
+        <svg slot="icon" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <button slot="actions" class="btn-secondary btn-pill" (click)="showJoinModal = true">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+          Katıl
+        </button>
+        <button slot="actions" class="btn-primary btn-pill" (click)="showCreateModal = true">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Yeni Oluştur
+        </button>
+      </app-page-header>
 
+      <!-- Empty State -->
+      <app-empty-state
+        *ngIf="workspaces.length === 0"
+        type="workspace"
+        title="Henüz Çalışma Alanınız Yok"
+        description="Bir davet koduyla mevcut bir alana katılabilir veya kendi çalışma alanınızı oluşturabilirsiniz.">
+        <button class="btn-secondary btn-pill" (click)="showJoinModal = true">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+          Alana Katıl
+        </button>
+        <button class="btn-primary btn-pill" (click)="showCreateModal = true">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Alan Oluştur
+        </button>
+      </app-empty-state>
+
+      <!-- Workspace Grid -->
       <div class="workspace-grid">
-        <div class="workspace-card" *ngFor="let ws of workspaces" (click)="goToWorkspace(ws.id)">
-          <div class="ws-banner" [style.background]="ws.banner_color || '#3b82f6'">
-            <h3>{{ ws.title }}</h3>
-            <!-- Role Badge on Banner -->
-            <span class="ws-role-badge" [class.owner]="ws.my_role === 'owner'" [class.member]="ws.my_role === 'member'">
-              <ng-container *ngIf="ws.my_role === 'owner'">🛡 Yönetici Paneli</ng-container>
-              <ng-container *ngIf="ws.my_role === 'member'">👤 Üye Paneli</ng-container>
+        <div class="workspace-card card-hover" *ngFor="let ws of workspaces" (click)="goToWorkspace(ws.id)">
+          <div class="ws-card-accent" [style.background]="ws.banner_color || 'var(--color-primary)'"></div>
+          <div class="ws-card-header">
+            <div class="ws-avatar" [style.background]="ws.banner_color || 'var(--color-primary)'">
+              {{ ws.title.charAt(0).toUpperCase() }}
+            </div>
+            <span class="badge" [class.badge-owner]="ws.my_role === 'owner'" [class.badge-member]="ws.my_role !== 'owner'">
+              <svg *ngIf="ws.my_role === 'owner'" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <svg *ngIf="ws.my_role !== 'owner'" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              {{ ws.my_role === 'owner' ? 'YÖNETİCİ' : 'ÜYE' }}
             </span>
           </div>
-          <div class="ws-content">
-            <p>{{ ws.description }}</p>
-            <div class="ws-footer">
-              <span class="ws-role-text">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                Rolünüz: <strong>{{ ws.my_role === 'owner' ? 'OWNER' : 'MEMBER' }}</strong>
-              </span>
-              <!-- Invite Code for OWNER Only -->
-              <div class="invite-section" *ngIf="ws.my_role === 'owner'" (click)="$event.stopPropagation()">
-                <span class="invite-label">Davet Kodu:</span>
-                <span class="invite-code">{{ ws.invite_code }}</span>
-                <button class="copy-btn" (click)="copyInvite(ws.invite_code)">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  Kopyala
-                </button>
-              </div>
+          
+          <div class="ws-card-body">
+            <h3 class="ws-title">{{ ws.title }}</h3>
+            <p class="ws-desc">{{ ws.description || 'Bu çalışma alanı için henüz bir açıklama eklenmemiş.' }}</p>
+          </div>
+          
+          <div class="ws-card-footer">
+            <div class="ws-invite" *ngIf="ws.my_role === 'owner'" (click)="$event.stopPropagation()">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+              <span class="invite-code">{{ ws.invite_code }}</span>
+              <button class="icon-btn-small" (click)="copyInvite(ws.invite_code)" title="Kopyala">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
             </div>
+            <div *ngIf="ws.my_role !== 'owner'"></div>
+            <button class="btn-open-ws">Aç →</button>
           </div>
         </div>
       </div>

@@ -1,0 +1,228 @@
+<div class="dashboard-wrapper">
+  <app-navbar activeTab="calendar"></app-navbar>
+
+  <!-- Modern Hero Area -->
+  <div class="cal-hero">
+    <div class="cal-hero-content">
+      <h1>Takvim</h1>
+      <p>Görevlerinizi ve teslim tarihlerinizi tek ekranda takip edin.</p>
+    </div>
+    <div class="cal-hero-actions">
+      <div class="cal-nav">
+        <button class="icon-btn" (click)="prev()" title="Önceki Ay">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="btn-today" (click)="today()">Bugün</button>
+        <button class="icon-btn" (click)="next()" title="Sonraki Ay">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        <span class="cal-current-date">
+          <ng-container *ngIf="viewMode === 'month'">{{ getMonthName() }}</ng-container>
+          <ng-container *ngIf="viewMode === 'week'">{{ getWeekRange() }}</ng-container>
+          <ng-container *ngIf="viewMode === 'day'">{{ getDayName() }}</ng-container>
+        </span>
+      </div>
+      <div class="view-toggles">
+        <button [class.active]="viewMode === 'day'" (click)="setViewMode('day')">Gün</button>
+        <button [class.active]="viewMode === 'week'" (click)="setViewMode('week')">Hafta</button>
+        <button [class.active]="viewMode === 'month'" (click)="setViewMode('month')">Ay</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="dashboard-main page-enter cal-main-layout">
+    
+    <!-- Left Area: Calendar Grid -->
+    <div class="cal-grid-area">
+      
+      <!-- Loading State -->
+      <div class="system-message" *ngIf="isLoading">
+        <p class="loading-text">
+          <svg class="spinner" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+          </svg>
+          Görevler yükleniyor...
+        </p>
+      </div>
+
+      <!-- Month View -->
+      <div class="cal-month-grid" *ngIf="!isLoading && viewMode === 'month'">
+        <div class="cal-weekday-header">Pzt</div>
+        <div class="cal-weekday-header">Sal</div>
+        <div class="cal-weekday-header">Çar</div>
+        <div class="cal-weekday-header">Per</div>
+        <div class="cal-weekday-header">Cum</div>
+        <div class="cal-weekday-header">Cmt</div>
+        <div class="cal-weekday-header">Paz</div>
+
+        <div class="cal-day-cell" *ngFor="let day of calendarDays" [class.not-current-month]="!day.isCurrentMonth" [class.is-today]="isToday(day.date)">
+          <div class="cal-day-number">{{ day.date | date:'d' }}</div>
+          <div class="cal-events">
+            <div class="cal-event-badge" *ngFor="let ev of day.events" 
+                 [class.ev-personal]="ev.type === 'personal'" 
+                 [class.ev-workspace]="ev.type === 'workspace'"
+                 [class.ev-approaching]="ev.isApproaching"
+                 [class.ev-overdue]="ev.isOverdue"
+                 (click)="openEventModal(ev, $event)"
+                 [title]="ev.title">
+              <span class="ev-dot"></span>
+              <span class="ev-title">{{ ev.title }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Week View -->
+      <div class="cal-week-grid" *ngIf="!isLoading && viewMode === 'week'">
+        <div class="week-col" *ngFor="let day of weekDays" [class.is-today]="isToday(day.date)">
+          <div class="week-col-header">
+            <span class="wd-name">{{ day.date | date:'EEEE':'':'tr-TR' }}</span>
+            <span class="wd-date">{{ day.date | date:'d MMM' }}</span>
+          </div>
+          <div class="week-col-content">
+            <div class="cal-card" *ngFor="let ev of day.events" 
+                 [class.card-workspace]="ev.type === 'workspace'"
+                 [class.card-approaching]="ev.isApproaching"
+                 [class.card-overdue]="ev.isOverdue"
+                 (click)="openEventModal(ev, $event)">
+              <div class="card-indicator"></div>
+              <h4>{{ ev.title }}</h4>
+              <span class="card-meta" *ngIf="ev.workspaceName">{{ ev.workspaceName }}</span>
+              <span class="card-status">{{ ev.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Day View -->
+      <div class="cal-day-view" *ngIf="!isLoading && viewMode === 'day'">
+        <div class="day-events-list">
+          <div class="empty-state" *ngIf="dayEvents.length === 0">
+            <h3>Bu gün için görev yok</h3>
+            <p>Dinlenmek için harika bir zaman!</p>
+          </div>
+          <div class="cal-card-large" *ngFor="let ev of dayEvents" 
+               [class.card-workspace]="ev.type === 'workspace'"
+               [class.card-approaching]="ev.isApproaching"
+               [class.card-overdue]="ev.isOverdue"
+               (click)="openEventModal(ev, $event)">
+            <div class="cl-left">
+              <div class="cl-indicator"></div>
+              <div class="cl-info">
+                <h3>{{ ev.title }}</h3>
+                <span class="cl-ws" *ngIf="ev.workspaceName">📍 {{ ev.workspaceName }}</span>
+              </div>
+            </div>
+            <div class="cl-right">
+              <span class="badge" [class.badge-pending]="ev.status === 'Bekliyor'" [class.badge-progress]="ev.status === 'Devam Ediyor'" [class.badge-completed]="ev.status === 'Tamamlandı'">{{ ev.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div> <!-- /Day View -->
+    </div> <!-- /cal-grid-area -->
+
+    <!-- Right Area: Upcoming Panel -->
+    <aside class="cal-sidebar">
+      <div class="upcoming-panel">
+        <h2 class="panel-title">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Yaklaşanlar
+        </h2>
+        
+        <div class="upc-group" *ngIf="overdueTasks.length > 0">
+          <h3 class="upc-group-title text-danger">Gecikenler</h3>
+          <div class="upc-card overdue" *ngFor="let ev of overdueTasks" (click)="openEventModal(ev, $event)">
+            <span class="upc-card-title">{{ ev.title }}</span>
+            <span class="upc-card-date">{{ ev.date | date:'dd MMM' }}</span>
+          </div>
+        </div>
+
+        <div class="upc-group">
+          <h3 class="upc-group-title">Bugün</h3>
+          <div class="empty-small" *ngIf="todayTasks.length === 0">Bugün için görev yok</div>
+          <div class="upc-card" *ngFor="let ev of todayTasks" 
+               [class.personal]="ev.type === 'personal'" 
+               [class.workspace]="ev.type === 'workspace'"
+               (click)="openEventModal(ev, $event)">
+            <span class="upc-card-title">{{ ev.title }}</span>
+          </div>
+        </div>
+
+        <div class="upc-group">
+          <h3 class="upc-group-title">Yarın</h3>
+          <div class="empty-small" *ngIf="tomorrowTasks.length === 0">Yarına planlanmış görev yok</div>
+          <div class="upc-card" *ngFor="let ev of tomorrowTasks" 
+               [class.personal]="ev.type === 'personal'" 
+               [class.workspace]="ev.type === 'workspace'"
+               (click)="openEventModal(ev, $event)">
+            <span class="upc-card-title">{{ ev.title }}</span>
+          </div>
+        </div>
+
+        <div class="upc-group">
+          <h3 class="upc-group-title">Bu Hafta</h3>
+          <div class="empty-small" *ngIf="thisWeekTasks.length === 0">Bu haftaya planlanmış başka görev yok</div>
+          <div class="upc-card" *ngFor="let ev of thisWeekTasks" 
+               [class.personal]="ev.type === 'personal'" 
+               [class.workspace]="ev.type === 'workspace'"
+               (click)="openEventModal(ev, $event)">
+            <span class="upc-card-title">{{ ev.title }}</span>
+            <span class="upc-card-date">{{ ev.date | date:'dd MMM EEEE':'':'tr-TR' }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Görev Detayı</h2>
+      <button class="btn-close" (click)="closeModal()">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedEvent">
+      <div class="ev-modal-header" [class.evm-workspace]="selectedEvent.type === 'workspace'">
+        <span class="evm-type">{{ selectedEvent.type === 'workspace' ? 'Çalışma Alanı Görevi' : 'Kişisel Görev' }}</span>
+        <h3 class="evm-title">{{ selectedEvent.title }}</h3>
+        <span class="evm-ws" *ngIf="selectedEvent.workspaceName">{{ selectedEvent.workspaceName }}</span>
+      </div>
+      
+      <div class="ev-details">
+        <div class="ev-detail-row">
+          <strong>Durum:</strong>
+          <span>{{ selectedEvent.status }}</span>
+        </div>
+        <div class="ev-detail-row" *ngIf="selectedEvent.priority">
+          <strong>Öncelik:</strong>
+          <span>{{ selectedEvent.priority }}</span>
+        </div>
+        <div class="ev-detail-row">
+          <strong>Teslim Tarihi:</strong>
+          <span [class.text-danger]="selectedEvent.isApproaching">{{ selectedEvent.date | date:'dd MMMM yyyy' }}</span>
+        </div>
+        <div class="ev-detail-row" *ngIf="selectedEvent.originalTask.description">
+          <strong>Açıklama:</strong>
+          <p class="ev-desc-box">{{ selectedEvent.originalTask.description }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="closeModal()">Kapat</button>
+    </div>
+  </div>
+</div>

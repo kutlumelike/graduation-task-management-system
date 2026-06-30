@@ -1,0 +1,16 @@
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-header-icon" [ngClass]="iconColor">
+      <!-- Icon slot -->
+      <ng-content select="[slot=icon]"></ng-content>
+    </div>
+    <div class="page-header-text">
+      <h1>{{ title }}</h1>
+      <p *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+  </div>
+  <div class="page-header-actions">
+    <!-- Action buttons slot -->
+    <ng-content select="[slot=actions]"></ng-content>
+  </div>
+</div>

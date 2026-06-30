@@ -43,6 +43,14 @@ export class WorkspaceDetailComponent implements OnInit, OnDestroy {
   selectedSubmissionFile: File | null = null;
   newSubmissionDescription: string = '';
 
+  // File Filtering
+  fileSearchQuery: string = '';
+  fileTypeFilter: string = 'all';
+
+  // Activity Filtering
+  activitySearchQuery: string = '';
+  activityTypeFilter: string = 'all';
+
   // Edit Workspace Modal
   showEditModal: boolean = false;
   editTitle: string = '';
@@ -411,6 +419,13 @@ export class WorkspaceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  triggerFileInput(): void {
+    const fileInput = document.getElementById('wsFileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
   deleteFile(file: WorkspaceFile): void {
     if (!this.workspace?.id || !file.id) return;
     if (confirm('Bu dosyayı silmek istediğinize emin misiniz?')) {
@@ -441,6 +456,113 @@ export class WorkspaceDetailComponent implements OnInit, OnDestroy {
     };
     return icons[type] || '🔔';
   }
+
+  // --- File Helpers ---
+  getFileType(fileName: string): string {
+    if (!fileName) return 'other';
+    const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+    if (ext === '.pdf') return 'pdf';
+    if (ext === '.doc' || ext === '.docx') return 'word';
+    if (ext === '.ppt' || ext === '.pptx') return 'ppt';
+    if (ext === '.xls' || ext === '.xlsx' || ext === '.csv') return 'excel';
+    if (['.jpg', '.jpeg', '.png', '.gif', '.svg'].includes(ext)) return 'image';
+    return 'other';
+  }
+
+  getFileColor(fileName: string): string {
+    const type = this.getFileType(fileName);
+    switch (type) {
+      case 'pdf': return '#ef4444'; // Kırmızı
+      case 'word': return '#3b82f6'; // Mavi
+      case 'ppt': return '#f97316'; // Turuncu
+      case 'excel': return '#10b981'; // Yeşil
+      case 'image': return '#8b5cf6'; // Mor
+      default: return '#64748b'; // Gri
+    }
+  }
+
+  getFilteredFiles(filesToFilter: WorkspaceFile[]): WorkspaceFile[] {
+    if (!filesToFilter) return [];
+    let filtered = filesToFilter;
+    
+    if (this.fileTypeFilter !== 'all') {
+      filtered = filtered.filter(f => this.getFileType(f.file_name) === this.fileTypeFilter);
+    }
+    
+    if (this.fileSearchQuery.trim()) {
+      const q = this.fileSearchQuery.toLowerCase();
+      filtered = filtered.filter(f => 
+        f.file_name.toLowerCase().includes(q) || 
+        (f.description && f.description.toLowerCase().includes(q))
+      );
+    }
+    
+    return filtered;
+  }
+
+  // --- Activity Helpers ---
+  getFilteredActivities(): WorkspaceActivity[] {
+    if (!this.activityLog) return [];
+    let filtered = this.activityLog;
+
+    // Type filter
+    if (this.activityTypeFilter !== 'all') {
+      filtered = filtered.filter(a => {
+        if (this.activityTypeFilter === 'tasks') return a.action_type.startsWith('task_');
+        if (this.activityTypeFilter === 'files') return a.action_type.startsWith('file_');
+        if (this.activityTypeFilter === 'submissions') return a.action_type.startsWith('submission_');
+        if (this.activityTypeFilter === 'announcements') return a.action_type.startsWith('announcement_');
+        if (this.activityTypeFilter === 'members') return a.action_type.startsWith('member_') || a.action_type === 'workspace_created';
+        return true;
+      });
+    }
+
+    // Search query
+    if (this.activitySearchQuery.trim()) {
+      const q = this.activitySearchQuery.toLowerCase();
+      filtered = filtered.filter(a => 
+        (a.description && a.description.toLowerCase().includes(q)) ||
+        (a.user_name && a.user_name.toLowerCase().includes(q))
+      );
+    }
+
+    return filtered;
+  }
+
+  getActivitiesByDateGroup(): { title: string, activities: WorkspaceActivity[] }[] {
+    const filtered = this.getFilteredActivities();
+    if (filtered.length === 0) return [];
+
+    const today: WorkspaceActivity[] = [];
+    const yesterday: WorkspaceActivity[] = [];
+    const older: WorkspaceActivity[] = [];
+
+    const now = new Date();
+    const todayStr = now.toDateString();
+    
+    const yestDate = new Date();
+    yestDate.setDate(yestDate.getDate() - 1);
+    const yesterdayStr = yestDate.toDateString();
+
+    filtered.forEach(a => {
+      const dateStr = new Date(a.created_at).toDateString();
+      if (dateStr === todayStr) {
+        today.push(a);
+      } else if (dateStr === yesterdayStr) {
+        yesterday.push(a);
+      } else {
+        older.push(a);
+      }
+    });
+
+    const groups = [];
+    if (today.length > 0) groups.push({ title: 'Bugün', activities: today });
+    if (yesterday.length > 0) groups.push({ title: 'Dün', activities: yesterday });
+    if (older.length > 0) groups.push({ title: 'Daha Eski', activities: older });
+
+    return groups;
+  }
+
 
   goBack(): void {
     this.router.navigate(['/workspaces']);

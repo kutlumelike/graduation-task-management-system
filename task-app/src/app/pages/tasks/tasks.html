@@ -1,54 +1,5 @@
-<div class="dashboard-wrapper" [class.dark-mode]="isDarkMode">
-  <!-- Top Navbar -->
-  <nav class="navbar">
-    <div class="nav-brand">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-          stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-      </div>
-      <h2>GörevYönetimi <span class="role-badge" [ngClass]="getRoleBadgeClass(userRole)">{{ userRole | uppercase
-          }}</span></h2>
-      <div class="nav-links" style="margin-left: 2rem;">
-        <button class="btn-ghost active">Kişisel</button>
-        <button class="btn-ghost" (click)="goToWorkspaces()">Çalışma Alanları (Workspaces)</button>
-      </div>
-    </div>
-
-    <div class="nav-user">
-      <div class="nav-actions">
-        <!-- Dark Mode Toggle -->
-        <button class="icon-btn" (click)="toggleTheme()" title="Temayı Değiştir">
-          <svg *ngIf="!isDarkMode" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-            stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-          <svg *ngIf="isDarkMode" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-            stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-        </button>
-
-        <!-- Notification Bell -->
-        <app-notification-bell></app-notification-bell>
-      </div>
-
-      <div class="user-avatar" (click)="openSessionModal()" style="cursor:pointer;" title="Oturumları Yönet">{{
-        userName.charAt(0) || 'U' }}</div>
-      <span class="user-name">{{ userName }}</span>
-      <button class="btn-logout" (click)="logout()">Çıkış Yap</button>
-    </div>
-  </nav>
+<div class="dashboard-wrapper" [class.focus-mode]="focusMode">
+  <app-navbar activeTab="tasks" (openSession)="openSessionModal()"></app-navbar>
 
   <main class="dashboard-main">
 
@@ -56,9 +7,22 @@
     <div class="main-content">
 
       <header class="dashboard-header">
-        <div class="header-text">
+        <div class="header-top">
+          <div class="header-text">
+          <div *ngIf="focusMode" class="focus-mode-badge">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            Odak Modu Aktif
+          </div>
           <h1>Hoş geldin, {{ userName }} 👋</h1>
-          <p class="subtitle">Harika bir gün, bugün neler başaracaksın?</p>
+            <p class="subtitle">İşlerini takip et, odaklan ve harika bir gün geçir.</p>
+          </div>
+          <button class="btn-primary btn-new-task" (click)="openModal()">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Yeni Görev Oluştur
+          </button>
         </div>
 
         <div class="header-actions advanced-search">
@@ -121,42 +85,59 @@
       <!-- Stats Cards -->
       <section class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="stat-icon icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            </svg></div>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </div>
           <div class="stat-info">
             <h3>Toplam</h3>
             <p class="stat-value">{{ totalTasks }}</p>
+            <span class="stat-desc">Oluşturulan tüm görevler</span>
           </div>
         </div>
+        
         <div class="stat-card">
-          <div class="stat-icon icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="stat-icon icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg></div>
+            </svg>
+          </div>
           <div class="stat-info">
             <h3>Tamamlanan</h3>
             <p class="stat-value">{{ completedTasks }}</p>
+            <span class="stat-desc">Başarıyla bitirilenler</span>
           </div>
         </div>
+        
         <div class="stat-card">
-          <div class="stat-icon icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2">
+          <div class="stat-icon icon-orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
-            </svg></div>
+            </svg>
+          </div>
           <div class="stat-info">
             <h3>Devam Eden</h3>
             <p class="stat-value">{{ activeTasks }}</p>
+            <span class="stat-desc">Üzerinde çalışılanlar</span>
           </div>
         </div>
+        
         <div class="stat-card">
-          <div class="stat-icon icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="stat-icon icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            </svg></div>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
           <div class="stat-info">
             <h3>Geciken</h3>
             <p class="stat-value">{{ overdueTasks }}</p>
+            <span class="stat-desc">Tarihi geçmiş görevler</span>
           </div>
         </div>
       </section>
@@ -205,17 +186,19 @@
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="filteredTasks.length === 0 && !isLoading" class="empty-state">
-        <div class="empty-illustration">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-            <path d="M9 12l2 2 4-4"></path>
+      <app-empty-state
+        *ngIf="filteredTasks.length === 0 && !isLoading"
+        type="task"
+        title="Çalışma alanın tertemiz ✨"
+        description="Henüz görev eklemediniz. Hemen başlayabilir ve günüzü organize edebilirsiniz.">
+        <button class="btn-primary btn-new-task" (click)="openModal()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-        </div>
-        <h3>Çalışma alanın tertemiz ✨</h3>
-        <p>Görünüşe göre burada her şey tamam. Yeni bir görev ekleyerek başlayabilirsiniz.</p>
-        <button class="btn-primary" (click)="openModal()">İlk Görevini Ekle</button>
-      </div>
+          İlk Görevini Oluştur
+        </button>
+      </app-empty-state>
 
       <!-- List View -->
       <section class="task-grid" *ngIf="viewMode === 'list' && filteredTasks.length > 0">
@@ -265,11 +248,9 @@
       <div class="widget-card insight-widget" *ngIf="smartInsight">
         <div class="widget-header">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path
-              d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41">
-            </path>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
           </svg>
-          <h3>Bilgiendirici Panel</h3>
+          <h3>Akıllı Öneriler</h3>
         </div>
         <div class="widget-body">
           <p class="insight-text">{{ smartInsight }}</p>
@@ -290,14 +271,17 @@
         <div class="widget-body p-0">
           <div class="empty-small" *ngIf="upcomingTasks.length === 0">Yaklaşan görev bulunmuyor.</div>
           <ul class="upcoming-list" *ngIf="upcomingTasks.length > 0">
-            <li *ngFor="let task of upcomingTasks" (click)="openModal(task)">
-              <div class="u-date">
-                <span class="day">{{ task.duedate ? (task.duedate | date:'d') : '-' }}</span>
-                <span class="month">{{ task.duedate ? (task.duedate | date:'MMM') : '-' }}</span>
+            <li class="upcoming-item" *ngFor="let task of upcomingTasks" (click)="openModal(task)">
+              <div class="u-date-box">
+                <span class="u-month">{{ task.duedate ? (task.duedate | date:'MMM') : '-' }}</span>
+                <span class="u-day">{{ task.duedate ? (task.duedate | date:'dd') : '-' }}</span>
               </div>
               <div class="u-info">
                 <h4>{{ task.title }}</h4>
-                <p>{{ task.priority }}</p>
+                <p [class.high-priority]="task.priority === 'Urgent' || task.priority === 'High'">{{ task.priority }}</p>
+              </div>
+              <div class="u-arrow">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
               </div>
             </li>
           </ul>
@@ -314,12 +298,12 @@
         </div>
         <div class="widget-body">
           <div class="empty-small" *ngIf="activityHistory.length === 0">Henüz aktivite yok.</div>
-          <div class="timeline" *ngIf="activityHistory.length > 0">
+          <div class="activity-timeline" *ngIf="activityHistory.length > 0">
             <div class="timeline-item" *ngFor="let act of activityHistory">
-              <div class="t-dot"></div>
-              <div class="t-content">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
                 <p>{{ act.message }}</p>
-                <span class="t-time">{{ act.time }}</span>
+                <span class="timeline-time">{{ act.time }}</span>
               </div>
             </div>
           </div>
@@ -355,9 +339,8 @@
           'priority-high': task.priority === 'High',
           'priority-urgent': task.priority === 'Urgent'
         }">{{ task.priority }}</span>
-        <span class="badge" *ngIf="task.reminder_date" style="background-color: #fef3c7; color: #d97706; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-left: 4px; border: 1px solid #fde68a;">🔔 Hatırlatıcı Aktif</span>
+        <span class="badge" *ngIf="task.reminder_date" style="background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a;">🔔 Hatırlatıcı</span>
       </div>
-      <div class="category-tag">{{ task.category }}</div>
     </div>
 
     <h3 class="task-title" (click)="openModal(task)">{{ task.title }}</h3>
@@ -383,6 +366,14 @@
           <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
         {{ task.duedate || 'Tarih Yok' }}
+      </div>
+      
+      <div class="category-tag">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        {{ task.category }}
       </div>
 
       <div class="card-actions">

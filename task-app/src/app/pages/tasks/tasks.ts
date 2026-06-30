@@ -13,11 +13,13 @@ import { TaskFile } from '../../models/file.model';
 import { User } from '../../models/user.model';
 import { Session } from '../../models/session.model';
 import { NotificationBellComponent } from '../../components/notification-bell/notification-bell.component';
+import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [FormsModule, CommonModule, NotificationBellComponent],
+  imports: [FormsModule, CommonModule, NotificationBellComponent, NavbarComponent, EmptyStateComponent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css'
 })
@@ -32,7 +34,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   isLoading: boolean = false;
   viewMode: 'list' | 'kanban' = 'list';
-  isDarkMode: boolean = false;
+
 
   // Filter, Search & Focus
   currentFilter: string = 'All';
@@ -95,14 +97,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.userName = this.authService.getUserName() || 'Kullanıcı';
     this.userRole = this.authService.getRole();
-    this.addActivity(`${this.userName} oturum açtı.`);
     
-    // Check dark mode preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      this.isDarkMode = true;
-      document.body.classList.add('dark-theme');
-    }
     
     this.loadTasks();
     
@@ -160,17 +155,6 @@ export class TasksComponent implements OnInit, OnDestroy {
     });
   }
   
-  toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    if (this.isDarkMode) {
-      document.body.classList.add('dark-theme');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-theme');
-      localStorage.setItem('theme', 'light');
-    }
-  }
-
   // --- Kanban Logic ---
   get pendingTasks(): Task[] { return this.filteredTasks.filter(t => t.status === 'Bekliyor'); }
   get inProgressTasks(): Task[] { return this.filteredTasks.filter(t => t.status === 'Devam Ediyor'); }
@@ -267,9 +251,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
     if (this.focusMode) {
       filtered = filtered.filter(t => t.status !== 'Tamamlandı');
-      document.body.classList.add('focus-mode');
-    } else {
-      document.body.classList.remove('focus-mode');
     }
 
     if (this.currentFilter !== 'All') {
@@ -298,7 +279,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
     return filtered;
   }
-  
   applyAdvancedFilters(): void {
     this.loadTasks(); // Calls backend
   }
@@ -467,13 +447,7 @@ export class TasksComponent implements OnInit, OnDestroy {
     });
   }
   
-  getRoleBadgeClass(role: string): string {
-    switch(role) {
-      case 'admin': return 'badge-admin';
-      case 'manager': return 'badge-manager';
-      default: return 'badge-user';
-    }
-  }
+
 
   // --- Session Management ---
   openSessionModal(): void {
@@ -504,19 +478,7 @@ export class TasksComponent implements OnInit, OnDestroy {
     }
   }
 
-  logout(): void {
-    this.sessionService.logoutCurrentSession().subscribe({
-      next: () => this.executeLogout(),
-      error: () => this.executeLogout() // Logout anyway on error
-    });
-  }
-  
-  private executeLogout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
 
-  goToWorkspaces(): void {
-    this.router.navigate(['/workspaces']);
-  }
+
+  // --- Core Lifecycle & Init ---
 }

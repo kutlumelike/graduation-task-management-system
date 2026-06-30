@@ -68,7 +68,7 @@ export interface WorkspaceActivity {
   workspace_id: number;
   user_id: number;
   user_name: string;
-  action_type: 'announcement' | 'task_assigned' | 'task_completed' | 'file_uploaded' | 'comment';
+  action_type: 'announcement' | 'task_assigned' | 'task_completed' | 'file_uploaded' | 'comment' | 'workspace_created' | string;
   description: string;
   created_at: string;
 }

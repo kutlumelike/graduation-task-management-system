@@ -1,4 +1,4 @@
-<div class="dashboard-wrapper" [class.dark-mode]="isDarkMode">
+<div class="dashboard-wrapper">
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-brand">
@@ -23,36 +23,68 @@
     <app-notification-bell></app-notification-bell>
   </nav>
 
-  <main class="dashboard-main container">
-    <div class="error-text" *ngIf="errorMessage"
-      style="margin-bottom: 1rem; color: #ef4444; background: #fee2e2; padding: 1rem; border-radius: 8px;">
+  <main class="dashboard-main container page-enter">
+    <!-- Error Banner -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
       {{ errorMessage }}
     </div>
 
+    <!-- Skeleton Loader (while workspace is loading) -->
+    <div *ngIf="!workspace && !errorMessage" class="ws-skeleton">
+      <div class="skeleton-card" style="height: 140px; margin-bottom: 1.5rem;"></div>
+      <div class="skeleton-card" style="padding: 1.5rem;">
+        <div style="display:flex; gap: 1rem; margin-bottom: 1rem;">
+          <div class="skeleton skeleton-btn" style="width:80px;"></div>
+          <div class="skeleton skeleton-btn" style="width:80px;"></div>
+          <div class="skeleton skeleton-btn" style="width:80px;"></div>
+        </div>
+        <div class="skeleton skeleton-title" style="width: 40%; margin-bottom: 0.75rem;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%; margin-bottom: 0.5rem;"></div>
+        <div class="skeleton skeleton-text" style="width: 65%;"></div>
+      </div>
+    </div>
     <div *ngIf="workspace">
       <!-- Header Banner -->
-      <div class="ws-hero" [style.background]="workspace.banner_color || '#2563eb'">
-        <div class="ws-hero-content">
-          <h1>{{ workspace.title }}</h1>
-          <p>{{ workspace.description }}</p>
-        </div>
-        <div class="ws-hero-actions">
-          <div class="role-badge" [class.owner]="isOwner" [class.member]="!isOwner">
-            <ng-container *ngIf="isOwner">🛡 Yönetici Paneli</ng-container>
-            <ng-container *ngIf="!isOwner">👤 Üye Paneli</ng-container>
+      <div class="ws-hero" [style.borderTopColor]="workspace.banner_color || '#2563eb'">
+        <div class="ws-hero-inner">
+          <div class="ws-hero-avatar" [style.backgroundColor]="workspace.banner_color || '#2563eb'">
+            {{ workspace.title.charAt(0) | uppercase }}
           </div>
-          <!-- Edit Workspace Button (owner only) -->
-          <button class="btn-edit-ws" *ngIf="isOwner" (click)="openEditModal()" id="edit-workspace-btn" title="Çalışma Alanını Düzenle">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Düzenle
-          </button>
-          <div class="invite-box" *ngIf="isOwner">
-            <span class="invite-label">Davet Kodu:</span>
-            <span class="invite-code-val">{{ workspace.invite_code }}</span>
-            <button class="copy-btn" (click)="copyInvite(workspace.invite_code)" id="copy-invite-btn">Kopyala</button>
+          <div class="ws-hero-content">
+            <div class="ws-title-row">
+              <h1>{{ workspace.title }}</h1>
+              <div class="role-badge" [class.owner]="isOwner" [class.member]="!isOwner">
+                <ng-container *ngIf="isOwner">🛡 YÖNETİCİ</ng-container>
+                <ng-container *ngIf="!isOwner">👤 ÜYE</ng-container>
+              </div>
+            </div>
+            <p>{{ workspace.description }}</p>
+          </div>
+          
+          <div class="ws-hero-actions">
+            <!-- Edit Workspace Button (owner only) -->
+            <button class="icon-btn-text" *ngIf="isOwner" (click)="openEditModal()" id="edit-workspace-btn" title="Çalışma Alanını Düzenle">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Düzenle</span>
+            </button>
+            <div class="invite-box" *ngIf="isOwner">
+              <span class="invite-label">KOD:</span>
+              <span class="invite-code-val">{{ workspace.invite_code }}</span>
+              <button class="copy-btn-icon" (click)="copyInvite(workspace.invite_code)" id="copy-invite-btn" title="Kopyala">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -63,45 +95,74 @@
 
           <!-- LEFT / MAIN: Announcements -->
           <div class="feed-column">
+            
+            <!-- Top Info Grid -->
+            <div class="ws-info-grid">
+              <div class="ws-info-card">
+                <span class="wi-label">Üye Sayısı</span>
+                <span class="wi-value">{{ members.length }}</span>
+              </div>
+              <div class="ws-info-card">
+                <span class="wi-label">Açık Görevler</span>
+                <span class="wi-value">{{ tasks.length }}</span>
+              </div>
+              <div class="ws-info-card">
+                <span class="wi-label">Dosyalar</span>
+                <span class="wi-value">{{ files.length }}</span>
+              </div>
+              <div class="ws-info-card">
+                <span class="wi-label">Rolünüz</span>
+                <span class="wi-value" [style.color]="isOwner ? '#3b82f6' : '#64748b'">{{ isOwner ? 'Yönetici' : 'Üye' }}</span>
+              </div>
+            </div>
+
             <!-- Create Announcement -->
-            <div class="card create-card" *ngIf="isOwner">
-              <div class="user-avatar-small">{{ getInitial() }}</div>
-              <input type="text" placeholder="Çalışma alanınızla bir duyuru paylaşın..." [(ngModel)]="newAnnouncementContent"
-                (keyup.enter)="createAnnouncement()" />
-              <button class="btn-primary" (click)="createAnnouncement()"
-                [disabled]="!newAnnouncementContent.trim()">Paylaş</button>
+            <div class="create-post-box" *ngIf="isOwner">
+              <div class="cp-header">
+                <div class="cp-avatar">{{ getInitial() }}</div>
+                <input type="text" class="cp-input" placeholder="Ekibinizle yeni bir duyuru paylaşın..." [(ngModel)]="newAnnouncementContent"
+                  (keyup.enter)="createAnnouncement()" />
+              </div>
+              <div class="cp-actions">
+                <button class="cp-btn-submit" (click)="createAnnouncement()"
+                  [disabled]="!newAnnouncementContent.trim()">Gönder</button>
+              </div>
             </div>
 
             <!-- Announcements List -->
             <div class="feed-list">
-              <div *ngIf="announcements.length === 0" class="card"
-                style="padding: 2rem; text-align: center; color: #64748b;">
-                Henüz bir duyuru yok.
+              <div *ngIf="announcements.length === 0" class="empty-feed">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <p>Henüz bir duyuru paylaşılmadı.</p>
               </div>
-              <div class="card feed-card" *ngFor="let ann of announcements">
-                <div class="card-header">
-                  <div class="user-avatar-small">{{ ann.creator_name?.charAt(0) || 'A' }}</div>
-                  <div class="meta">
-                    <strong>{{ ann.creator_name }}</strong>
-                    <span class="date">{{ ann.created_at | date:'dd MMM yyyy HH:mm' }}</span>
+              
+              <div class="post-card" *ngFor="let ann of announcements">
+                <div class="post-header">
+                  <div class="post-avatar">{{ ann.creator_name?.charAt(0) || 'A' }}</div>
+                  <div class="post-meta">
+                    <span class="post-author">{{ ann.creator_name }}</span>
+                    <span class="post-date">{{ ann.created_at | date:'dd MMM yyyy, HH:mm' }}</span>
                   </div>
                 </div>
-                <div class="card-body">
+                
+                <div class="post-content">
                   <h4 *ngIf="ann.title">{{ ann.title }}</h4>
                   <p>{{ ann.content }}</p>
                 </div>
-                <div class="comment-section">
-                  <div class="comment-list" *ngIf="ann._comments && ann._comments.length > 0">
+                
+                <div class="post-comments">
+                  <div class="comments-list" *ngIf="ann._comments && ann._comments.length > 0">
                     <div class="comment-item" *ngFor="let c of ann._comments">
-                      <strong>{{ c.user_name }}:</strong> {{ c.content }}
+                      <span class="c-author">{{ c.user_name }}:</span> <span class="c-text">{{ c.content }}</span>
                     </div>
                   </div>
-                  <div class="comment-input">
-                    <input type="text" placeholder="Çalışma alanına yorum ekle..." [(ngModel)]="ann._newComment"
+                  <div class="comment-input-area">
+                    <input type="text" placeholder="Yorum yaz..." [(ngModel)]="ann._newComment"
                       (keyup.enter)="addCommentToAnnouncement(ann)" />
-                    <button class="btn-ghost btn-sm" (click)="addCommentToAnnouncement(ann)">
-                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-                        stroke-width="2">
+                    <button class="btn-send-comment" (click)="addCommentToAnnouncement(ann)">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="22" y1="2" x2="11" y2="13"></line>
                         <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                       </svg>
@@ -112,32 +173,68 @@
             </div>
           </div>
 
-          <!-- RIGHT SIDEBAR: Tasks -->
+          <!-- RIGHT SIDEBAR: Widgets -->
           <div class="sidebar-column">
-            <div class="card sidebar-card">
-              <div class="card-header d-flex justify-between align-center">
+            
+            <!-- Tasks Widget -->
+            <div class="sidebar-widget">
+              <div class="widget-head">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <h3>Yaklaşan Görevler</h3>
               </div>
-              <div class="card-body p-0">
-                <div *ngIf="tasks.length === 0"
-                  style="padding: 1.5rem; text-align: center; color: #64748b; font-size: 0.9rem;">
-                  Yakında teslim edilecek görev yok.
-                </div>
-                <div class="task-list">
-                  <div class="task-item" *ngFor="let t of tasks.slice(0,4)">
-                    <div class="task-meta">
-                      <span class="due-date" *ngIf="t.due_date">Teslim: {{ t.due_date | date:'dd MMM' }}</span>
-                      <span class="status-badge" [class.pending]="t.status === 'Bekliyor'"
-                        [class.done]="t.status === 'Tamamlandı'">{{ t.status }}</span>
+              <div class="widget-body">
+                <div *ngIf="tasks.length === 0" class="empty-small">Bekleyen görev yok.</div>
+                <ul class="sw-list">
+                  <li *ngFor="let t of tasks.slice(0,3)" (click)="setTab('tasks')">
+                    <div class="sw-content">
+                      <h4>{{ t.title }}</h4>
+                      <span class="sw-sub" *ngIf="t.due_date">Teslim: {{ t.due_date | date:'dd MMM' }}</span>
                     </div>
-                    <h4>{{ t.title }}</h4>
+                    <span class="sw-badge" [class.sw-pending]="t.status === 'Bekliyor'" [class.sw-done]="t.status === 'Tamamlandı'">{{ t.status }}</span>
+                  </li>
+                </ul>
+              </div>
+              <button class="widget-footer-btn" (click)="setTab('tasks')">Tüm Görevleri Gör</button>
+            </div>
+
+            <!-- Recent Files Widget -->
+            <div class="sidebar-widget">
+              <div class="widget-head">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                <h3>Son Yüklenen Dosyalar</h3>
+              </div>
+              <div class="widget-body">
+                <div *ngIf="files.length === 0" class="empty-small">Henüz dosya yok.</div>
+                <ul class="sw-list">
+                  <li *ngFor="let f of files.slice(0,3)" (click)="setTab('files')">
+                    <div class="sw-content">
+                      <h4>{{ f.file_name }}</h4>
+                      <span class="sw-sub">{{ f.uploader_name }}</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <button class="widget-footer-btn" (click)="setTab('files')">Dosyalara Git</button>
+            </div>
+            
+            <!-- Active Members Widget -->
+            <div class="sidebar-widget">
+              <div class="widget-head">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <h3>Aktif Üyeler</h3>
+              </div>
+              <div class="widget-body">
+                <div class="member-avatars">
+                  <div class="m-avatar" *ngFor="let m of members.slice(0,5)" [title]="m.user_name">
+                    {{ m.user_name.charAt(0) | uppercase }}
                   </div>
-                </div>
-                <div style="padding: 1rem; text-align: center; border-top: 1px solid #f1f5f9;">
-                  <button class="btn-ghost btn-sm" (click)="setTab('tasks')">Tümünü Gör</button>
+                  <div class="m-avatar more" *ngIf="members.length > 5" (click)="setTab('members')">
+                    +{{ members.length - 5 }}
+                  </div>
                 </div>
               </div>
             </div>
+
           </div>
 
         </div>
@@ -145,56 +242,98 @@
 
       <!-- ===================== TASKS TAB ===================== -->
       <div *ngIf="activeTab === 'tasks'">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem;" *ngIf="isOwner">
-          <button class="btn-primary" (click)="showTaskModal = true" id="new-task-btn">+ Yeni Görev</button>
+        
+        <!-- Tasks Hero Header -->
+        <div class="ws-tab-hero">
+          <div class="ws-tab-hero-left">
+            <h2>Çalışma Alanı Görevleri</h2>
+            <p>Bu alanın tüm görevlerini yönetin, takip edin ve tamamlayın.</p>
+          </div>
+          <button class="btn-primary ws-new-task-btn" *ngIf="isOwner" (click)="showTaskModal = true" id="new-task-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Yeni Görev
+          </button>
         </div>
-        <div *ngIf="tasks.length === 0" class="card" style="padding: 3rem; text-align: center; color: #64748b;">
-          Henüz çalışma alanı görevi eklenmemiş.
+
+        <!-- Empty state -->
+        <div *ngIf="tasks.length === 0" class="ws-empty-state">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+            <rect x="8" y="12" width="48" height="40" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+            <path d="M20 28h24M20 36h16" stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          <h3>Henüz görev eklenmemiş</h3>
+          <p>Yeni görev oluşturarak ekibinizi organize etmeye başlayın.</p>
+          <button class="btn-primary ws-new-task-btn" *ngIf="isOwner" (click)="showTaskModal = true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            İlk Görevi Oluştur
+          </button>
         </div>
-        <div class="task-list-tab">
-          <div class="card task-full-card" *ngFor="let t of tasks">
-            <div class="d-flex justify-between" style="margin-bottom: 1rem; align-items: flex-start;">
-              <div style="display: flex; gap: 1rem; align-items: center;">
-                <div
-                  style="background: #e0e7ff; color: #4f46e5; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                  </svg>
+
+        <!-- Task Cards List -->
+        <div class="ws-task-list" *ngIf="tasks.length > 0">
+          <div class="ws-task-card" *ngFor="let t of tasks">
+            <div class="ws-task-accent"
+              [style.background]="t.status === 'Tamamlandı' ? '#10b981' : t.status === 'Devam Ediyor' ? '#3b82f6' : '#94a3b8'">
+            </div>
+            <div class="ws-task-body">
+              <div class="ws-task-top">
+                <div class="ws-task-title-area">
+                  <h3 class="ws-task-title">{{ t.title }}</h3>
+                  <p class="ws-task-desc" *ngIf="t.description">{{ t.description }}</p>
                 </div>
-                <div>
-                  <h3 style="margin: 0 0 0.25rem 0; color: #0f172a;">{{ t.title }}</h3>
-                  <div style="font-size: 0.85rem; color: #64748b; display: flex; gap: 1rem;">
-                    <span>Oluşturan: {{ t.creator_name }}</span>
-                    <span *ngIf="t.due_date">Teslim: {{ t.due_date | date:'dd MMM yyyy' }}</span>
+                <div class="ws-task-actions">
+                  <span class="ws-status-pill"
+                    [class.ws-pill-done]="t.status === 'Tamamlandı'"
+                    [class.ws-pill-progress]="t.status === 'Devam Ediyor'"
+                    [class.ws-pill-pending]="t.status === 'Bekliyor'">
+                    {{ t.status }}
+                  </span>
+                  <button class="ws-btn-complete" *ngIf="!isOwner" (click)="toggleTaskCompletion(t)">
+                    {{ t.status === 'Tamamlandı' ? '↩ Geri Al' : '✓ Tamamla' }}
+                  </button>
+                  <button class="ws-btn-delete" *ngIf="isOwner" (click)="deleteTask(t)" title="Sil">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="ws-task-meta">
+                <span class="ws-meta-chip" *ngIf="t.creator_name">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+                  {{ t.creator_name }}
+                </span>
+                <span class="ws-meta-chip" *ngIf="t.due_date">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  {{ t.due_date | date:'dd MMM yyyy' }}
+                </span>
+              </div>
+
+              <!-- Comments -->
+              <div class="post-comments">
+                <div class="comments-list" *ngIf="t._comments && t._comments.length > 0">
+                  <div class="comment-item" *ngFor="let c of t._comments">
+                    <span class="c-author">{{ c.user_name }}:</span> <span class="c-text">{{ c.content }}</span>
                   </div>
                 </div>
-              </div>
-              <div class="d-flex" style="gap: 0.5rem; align-items: center;">
-                <span class="status-badge" [class.pending]="t.status === 'Bekliyor'"
-                  [class.done]="t.status === 'Tamamlandı'">{{ t.status }}</span>
-                <button class="btn-primary btn-sm" *ngIf="!isOwner" (click)="toggleTaskCompletion(t)">
-                  {{ t.status === 'Tamamlandı' ? 'Geri Al' : 'Tamamla' }}
-                </button>
-                <button class="btn-danger btn-sm" *ngIf="isOwner" (click)="deleteTask(t)"
-                  title="Görevi Sil">Sil</button>
-              </div>
-            </div>
-            <p style="color: #475569; margin: 1rem 0;">{{ t.description }}</p>
-
-            <div class="comment-section">
-              <div class="comment-list" *ngIf="t._comments && t._comments.length > 0">
-                <div class="comment-item" *ngFor="let c of t._comments">
-                  <strong>{{ c.user_name }}:</strong> {{ c.content }}
+                <div class="comment-input-area">
+                  <input type="text" placeholder="Göreve yorum ekle..." [(ngModel)]="t._newComment"
+                    (keyup.enter)="addCommentToTask(t)" />
+                  <button class="btn-send-comment" (click)="addCommentToTask(t)">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  </button>
                 </div>
-              </div>
-              <div class="comment-input">
-                <input type="text" placeholder="Göreve özel yorum ekle..." [(ngModel)]="t._newComment"
-                  (keyup.enter)="addCommentToTask(t)" />
-                <button class="btn-ghost btn-sm" (click)="addCommentToTask(t)">Gönder</button>
               </div>
             </div>
           </div>
@@ -202,87 +341,232 @@
       </div>
 
       <!-- ===================== FILES TAB ===================== -->
-      <div *ngIf="activeTab === 'files'">
-        <div class="upload-container" *ngIf="isOwner">
-          <input type="file" #fileInput accept=".pdf,.doc,.docx,.ppt,.pptx" style="display:none" (change)="onFileSelected($event)" />
-          <div style="flex: 1; display: flex; align-items: center; gap: 1rem; justify-content: flex-end;">
-            <input type="text" [(ngModel)]="newFileDescription" placeholder="Dosya açıklaması (İsteğe bağlı)" class="file-desc-input" />
-            <span style="font-size: 0.85rem; color: #64748b; white-space: nowrap;" *ngIf="selectedFile">{{ selectedFile.name }}</span>
-            <button class="btn-primary" *ngIf="selectedFile" (click)="uploadFile()" id="upload-file-btn">Yükle</button>
-            <button class="btn-primary" (click)="fileInput.click()" id="select-file-btn">+ Dosya Ekle</button>
+      <div *ngIf="activeTab === 'files'" class="fm-container">
+        
+        <!-- Toolbar: Header & Filters -->
+        <div class="fm-toolbar">
+          <div class="fm-header-left">
+            <h2>Çalışma Alanı Dosyaları</h2>
+            <p>Tüm proje materyallerini, dökümanları ve kaynakları buradan yönetin.</p>
+          </div>
+          <div class="fm-actions">
+            <div class="fm-search">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" [(ngModel)]="fileSearchQuery" placeholder="Dosyalarda ara..." />
+            </div>
+            <select [(ngModel)]="fileTypeFilter" class="fm-filter-select">
+              <option value="all">Tüm Türler</option>
+              <option value="pdf">PDF</option>
+              <option value="word">Word</option>
+              <option value="ppt">PowerPoint</option>
+              <option value="image">Görseller</option>
+              <option value="other">Diğer</option>
+            </select>
           </div>
         </div>
-        <div *ngIf="managerFiles.length === 0" class="card" style="padding: 3rem; text-align: center; color: #64748b;">
-          Henüz dosya yüklenmemiş.
+
+        <!-- Dropzone for Owner -->
+        <div class="fm-upload-section" *ngIf="isOwner">
+          <input type="file" id="wsFileInput" #fileInput accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png" style="display:none" (change)="onFileSelected($event)" />
+          
+          <!-- Drop Area -->
+          <div class="fm-dropzone" (click)="fileInput.click()">
+            <div class="fm-dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="fm-dropzone-text">
+              <h4>Dosya seçmek için tıklayın veya sürükleyin</h4>
+              <p>PDF, Word, PowerPoint veya Görsel dosyaları desteklenir</p>
+            </div>
+          </div>
+          
+          <!-- Upload Settings (Appears when file selected) -->
+          <div class="fm-upload-settings" *ngIf="selectedFile">
+            <div class="fm-selected-file">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path></svg>
+              <span>{{ selectedFile.name }}</span>
+            </div>
+            <input type="text" [(ngModel)]="newFileDescription" placeholder="Dosya açıklaması (İsteğe bağlı)" class="fm-desc-input" />
+            <button class="btn-primary" (click)="uploadFile()" id="upload-file-btn">
+              Yüklemeyi Başlat
+            </button>
+          </div>
         </div>
-        <div class="file-list-vertical">
-          <div class="card file-card-vertical" *ngFor="let f of managerFiles">
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <div style="display: flex; gap: 1rem; align-items: center;">
-                <div class="file-icon" style="font-size: 2.5rem; color: #cbd5e1;">📄</div>
-                <div class="file-info">
-                  <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="file-name" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ f.file_name }}</a>
-                  <div class="file-meta">
-                    <span>Yükleyen: <strong>{{ f.uploader_name }}</strong></span>
-                    <span class="file-date-badge">{{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
-                  </div>
-                  <p class="file-desc-text" *ngIf="f.description" style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--color-text-muted);">{{ f.description }}</p>
-                </div>
+
+        <!-- Empty State -->
+        <div *ngIf="getFilteredFiles(managerFiles).length === 0" class="fm-empty-state">
+          <div class="fm-empty-icon">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="12" y="10" width="40" height="48" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+              <path d="M24 24h16M24 32h16M24 40h8" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M42 10l10 10v0H42v-10z" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Klasör şu an boş</h3>
+          <p>Aradığınız kriterlere uygun dosya bulunamadı veya henüz dosya yüklenmedi.</p>
+          <button class="btn-primary" *ngIf="isOwner" (click)="triggerFileInput()">İlk Dosyayı Yükle</button>
+        </div>
+
+        <!-- Grid View -->
+        <div class="fm-grid">
+          <div class="fm-card" *ngFor="let f of getFilteredFiles(managerFiles)">
+            <div class="fm-card-header">
+              <div class="fm-file-icon" [style.color]="getFileColor(f.file_name)" [style.backgroundColor]="getFileColor(f.file_name) + '15'">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
               </div>
-              <button class="btn-danger btn-sm" style="border-radius: 20px; padding: 0.4rem 1rem; font-weight: 600;" *ngIf="isOwner || f.uploaded_by === currentUserId" (click)="deleteFile(f)" title="Dosyayı Sil">Sil</button>
+              <button class="fm-btn-more icon-btn" *ngIf="isOwner || f.uploaded_by === currentUserId" (click)="deleteFile(f)" title="Sil">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+            
+            <div class="fm-card-body">
+              <h4 class="fm-file-name" [title]="f.file_name">{{ f.file_name }}</h4>
+              <p class="fm-file-desc" *ngIf="f.description">{{ f.description }}</p>
+            </div>
+            
+            <div class="fm-card-footer">
+              <div class="fm-meta">
+                <span class="fm-uploader">{{ f.uploader_name }}</span>
+                <span class="fm-date">{{ f.uploaded_at | date:'dd MMM yyyy' }}</span>
+              </div>
+              <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="fm-btn-download">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </a>
             </div>
           </div>
         </div>
       </div>
 
       <!-- ===================== SUBMISSIONS TAB ===================== -->
-      <div *ngIf="activeTab === 'submissions'">
+      <div *ngIf="activeTab === 'submissions'" class="assignment-container">
         
         <!-- Öğrenci Görünümü -->
         <div *ngIf="!isOwner">
-          <!-- Yeni Teslim Formu -->
-          <div class="card" style="max-width: 600px; margin: 0 auto 2rem auto; padding: 2rem;">
-            <h3 style="margin-top: 0; color: #1e293b; font-size: 1.25rem;">Yeni Dosya Teslimi</h3>
-            
-            <div style="margin-top: 1.5rem;">
-              <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 0.5rem; color: #64748b;">Teslim Açıklaması</label>
-              <textarea [(ngModel)]="newSubmissionDescription" placeholder="Dosya ile ilgili notlarınızı buraya yazın..." rows="3" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
-            </div>
-            
-            <div style="margin-top: 1.5rem;">
-              <label style="display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 0.5rem; color: #64748b;">Dosya Seçme</label>
-              <div class="pdf-dropzone" (click)="submissionFileInput.click()">
-                <input type="file" #submissionFileInput accept=".pdf,.doc,.docx,.ppt,.pptx" style="display:none" (change)="onSubmissionFileSelected($event)" />
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: #64748b;">
-                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                  <span>{{ selectedSubmissionFile ? selectedSubmissionFile.name : 'Dosya Seçmek İçin Tıklayın' }}</span>
-                </div>
+          
+          <div class="assignment-header">
+            <div class="ah-left">
+              <div class="ah-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h2>Ödev & Dosya Teslimi</h2>
+                <p>Eğitmene iletmek istediğiniz dökümanları ve projeleri buradan yükleyin.</p>
               </div>
             </div>
+            <div class="ah-status-pill">
+              <span class="status-dot"></span>
+              Teslim Bekliyor
+            </div>
+          </div>
+
+          <!-- Yeni Teslim Formu (Öğrenci) -->
+          <div class="assignment-submission-card">
+            <div class="asc-header">
+              <h3>Çalışmanızı Ekleyin</h3>
+            </div>
+            <div class="asc-body">
+              
+              <input type="file" #submissionFileInput accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.png" style="display:none" (change)="onSubmissionFileSelected($event)" />
+              
+              <div class="assignment-dropzone" (click)="submissionFileInput.click()" *ngIf="!selectedSubmissionFile">
+                <div class="ad-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                </div>
+                <h4>Dosya seçmek için tıklayın veya sürükleyin</h4>
+                <p>Desteklenen formatlar: PDF, Word, PowerPoint, Görseller</p>
+              </div>
+              
+              <!-- File Preview Card -->
+              <div class="assignment-file-preview" *ngIf="selectedSubmissionFile">
+                <div class="afp-icon" [style.color]="getFileColor(selectedSubmissionFile.name)" [style.backgroundColor]="getFileColor(selectedSubmissionFile.name) + '15'">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                </div>
+                <div class="afp-details">
+                  <span class="afp-name">{{ selectedSubmissionFile.name }}</span>
+                  <span class="afp-size">Yüklenmeye hazır</span>
+                </div>
+                <button class="icon-btn btn-remove-file" (click)="selectedSubmissionFile = null; newSubmissionDescription = ''" title="Kaldır">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Textarea -->
+              <div class="assignment-textarea-wrapper" *ngIf="selectedSubmissionFile">
+                <textarea [(ngModel)]="newSubmissionDescription" placeholder="Eğitmene iletmek istediğiniz notlar (İsteğe bağlı)..." rows="3" class="assignment-textarea"></textarea>
+                <div class="textarea-footer">
+                  <span>{{ newSubmissionDescription.length }} / 500</span>
+                </div>
+              </div>
+
+            </div>
             
-            <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-              <button class="btn-primary" [disabled]="!selectedSubmissionFile" (click)="uploadSubmission()" style="padding: 0.6rem 1.5rem;">Dosya Teslim Et</button>
+            <div class="asc-footer">
+              <button class="btn-primary btn-submit-assignment" [disabled]="!selectedSubmissionFile" (click)="uploadSubmission()">
+                Dosyayı Teslim Et
+              </button>
             </div>
           </div>
 
           <!-- Kendi Teslimleri -->
-          <div style="max-width: 600px; margin: 0 auto;">
-            <h3 style="color: #1e293b; font-size: 1.1rem; margin-bottom: 1rem;">Teslim Ettiklerim</h3>
-            <div *ngIf="mySubmissions.length === 0" class="card" style="padding: 2rem; text-align: center; color: #64748b;">
-              Henüz bir dosya teslim etmediniz.
+          <div class="assignment-history">
+            <h3>Önceki Teslimlerim</h3>
+            <div *ngIf="getFilteredFiles(mySubmissions).length === 0" class="assignment-empty-state">
+              <div class="aes-icon-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <h4>Henüz teslim yapmadınız</h4>
+              <p>Gönderdiğiniz tüm ödevler ve projeler burada listelenir.</p>
             </div>
-            <div class="file-list-vertical">
-              <div class="card file-card-vertical" *ngFor="let f of mySubmissions" style="padding: 1rem 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                  <div style="display: flex; gap: 1rem; align-items: center;">
-                    <div class="file-icon" style="font-size: 2rem; color: #cbd5e1;">📄</div>
-                    <div class="file-info">
-                      <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="file-name" style="font-size: 1rem; margin-bottom: 0.2rem;">{{ f.file_name }}</a>
-                      <span class="file-meta" style="font-size: 0.75rem;">{{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
-                      <p class="file-desc-text" *ngIf="f.description" style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #475569;">{{ f.description }}</p>
+            
+            <div class="assignment-list">
+              <div class="assignment-card" *ngFor="let f of getFilteredFiles(mySubmissions)">
+                <div class="ac-left">
+                  <div class="ac-icon" [style.color]="getFileColor(f.file_name)" [style.backgroundColor]="getFileColor(f.file_name) + '15'">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                  </div>
+                  <div class="ac-info">
+                    <h4>{{ f.file_name }}</h4>
+                    <p *ngIf="f.description">{{ f.description }}</p>
+                    <div class="ac-meta">
+                      <span class="ac-date">{{ f.uploaded_at | date:'dd MMM yyyy, HH:mm' }}</span>
+                      <span class="ac-status success">Teslim Edildi</span>
                     </div>
                   </div>
-                  <button class="btn-danger btn-sm" style="border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.75rem; font-weight: 600;" (click)="deleteFile(f)" title="Dosyayı Sil">Sil</button>
+                </div>
+                <div class="ac-actions">
+                  <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="ac-btn download">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    İndir
+                  </a>
+                  <button class="ac-btn delete" (click)="deleteFile(f)" title="Geri Çek / Sil">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -291,28 +575,63 @@
 
         <!-- Yönetici Görünümü -->
         <div *ngIf="isOwner">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h3 style="margin: 0; color: #1e293b;">Üye Teslimleri</h3>
-            <span style="color: #64748b; font-size: 0.9rem;">Toplam: {{ studentSubmissions.length }} Teslim</span>
+          
+          <div class="assignment-header">
+            <div class="ah-left">
+              <div class="ah-icon owner-icon">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <div>
+                <h2>Öğrenci Teslimleri</h2>
+                <p>Çalışma alanındaki tüm üyelerin gönderdiği dosyalar ve projeler.</p>
+              </div>
+            </div>
+            
+            <div class="fm-search" style="min-width: 300px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" [(ngModel)]="fileSearchQuery" placeholder="Öğrenci adı veya dosya ara..." />
+            </div>
           </div>
-          <div *ngIf="studentSubmissions.length === 0" class="card" style="padding: 3rem; text-align: center; color: #64748b;">
-            Henüz teslim edilen bir dosya yok.
+
+          <div *ngIf="getFilteredFiles(studentSubmissions).length === 0" class="assignment-empty-state">
+            <div class="aes-icon-bg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <h4>Teslim Bulunmuyor</h4>
+            <p>Arama kriterlerine uygun veya henüz teslim edilmiş bir dosya yok.</p>
           </div>
-          <div class="file-list-vertical">
-            <div class="card file-card-vertical" *ngFor="let f of studentSubmissions">
-              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                  <div class="file-icon" style="font-size: 2.5rem; color: #cbd5e1;">📄</div>
-                  <div class="file-info">
-                  <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="file-name" style="font-size: 1.1rem; margin-bottom: 0.2rem;">{{ f.file_name }}</a>
-                  <div class="file-meta">
-                    <span>Teslim Eden: <strong>{{ f.uploader_name }}</strong></span>
-                    <span class="file-date-badge">{{ f.uploaded_at | date:'dd MMM yyyy HH:mm' }}</span>
-                  </div>
-                  <p class="file-desc-text" *ngIf="f.description" style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--color-text-muted);">{{ f.description }}</p>
+          
+          <div class="assignment-list">
+            <div class="assignment-card" *ngFor="let f of getFilteredFiles(studentSubmissions)">
+              <div class="ac-left">
+                <div class="ac-icon" [style.color]="getFileColor(f.file_name)" [style.backgroundColor]="getFileColor(f.file_name) + '15'">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                </div>
+                <div class="ac-info">
+                  <h4>{{ f.file_name }}</h4>
+                  <p *ngIf="f.description">{{ f.description }}</p>
+                  <div class="ac-meta">
+                    <span class="ac-uploader">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                      {{ f.uploader_name }}
+                    </span>
+                    <span class="ac-date">Teslim: {{ f.uploaded_at | date:'dd MMM yyyy, HH:mm' }}</span>
                   </div>
                 </div>
-                <button class="btn-danger btn-sm" style="border-radius: 20px; padding: 0.4rem 1rem; font-weight: 600;" (click)="deleteFile(f)" title="Dosyayı Sil">Sil</button>
+              </div>
+              <div class="ac-actions">
+                <a [href]="'http://localhost:5000' + f.file_path" target="_blank" class="ac-btn download">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  İndir
+                </a>
+                <button class="ac-btn delete" (click)="deleteFile(f)" title="Sil">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
               </div>
             </div>
           </div>
@@ -357,51 +676,107 @@
       </div>
 
       <!-- ===================== ACTIVITY TAB ===================== -->
-      <div *ngIf="activeTab === 'activity'">
-        <div class="card" style="padding: 1.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h3 style="margin: 0; color: #1e293b;">Son Aktiviteler</h3>
-            <button class="btn-danger btn-sm" style="border-radius: 8px; padding: 0.4rem 1rem;" *ngIf="isOwner && activityLog.length > 0" (click)="clearActivities()">Tümünü Temizle</button>
+      <div *ngIf="activeTab === 'activity'" class="activity-page-container">
+        
+        <!-- Header & Filters -->
+        <div class="ap-header">
+          <div class="ap-header-left">
+            <div class="ap-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+            <div>
+              <h2>Aktivite Akışı</h2>
+              <p>Çalışma alanında olup biten her şeyi takip edin.</p>
+            </div>
           </div>
-          <div *ngIf="activityLog.length === 0" style="text-align: center; color: #64748b; padding: 2rem;">
-            Henüz aktivite yok.
+          
+          <div class="ap-actions">
+            <div class="ap-search">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" [(ngModel)]="activitySearchQuery" placeholder="Aktivite veya kişi ara..." />
+            </div>
+            <select class="ap-filter-select" [(ngModel)]="activityTypeFilter">
+              <option value="all">Tümü</option>
+              <option value="tasks">Görevler</option>
+              <option value="files">Dosyalar</option>
+              <option value="submissions">Teslimler</option>
+              <option value="announcements">Duyurular</option>
+              <option value="members">Üyeler</option>
+            </select>
+            <button class="btn-danger btn-sm" *ngIf="isOwner && activityLog.length > 0" (click)="clearActivities()" style="padding: 0.5rem 1rem; border-radius: 999px;">Temizle</button>
           </div>
-          <div class="activity-timeline">
-            <div class="activity-item" *ngFor="let a of activityLog" style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div style="display: flex; align-items: flex-start; gap: 1rem; width: 100%;">
-                <div class="activity-icon">{{ getActivityIcon(a.action_type) }}</div>
-                <div class="activity-content" style="flex: 1;">
-                  <p class="activity-desc">{{ a.description }}</p>
-                  <span class="activity-time">{{ a.created_at | date:'dd MMM yyyy HH:mm' }}</span>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="getActivitiesByDateGroup().length === 0" class="ap-empty-state">
+          <div class="ap-empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <h3>Aktivite Bulunmuyor</h3>
+          <p>Belirlediğiniz kriterlere uyan veya henüz gerçekleşmiş bir işlem yok.</p>
+        </div>
+
+        <!-- Timeline Groups -->
+        <div class="ap-timeline-wrapper" *ngIf="getActivitiesByDateGroup().length > 0">
+          
+          <div class="ap-date-group" *ngFor="let group of getActivitiesByDateGroup()">
+            <div class="ap-date-label">
+              <span>{{ group.title }}</span>
+              <div class="ap-date-line"></div>
+            </div>
+            
+            <div class="ap-timeline">
+              <div class="ap-item" *ngFor="let a of group.activities">
+                
+                <div class="ap-item-icon" 
+                     [ngClass]="{'bg-blue': a.action_type.startsWith('task_'), 
+                                 'bg-purple': a.action_type.startsWith('file_') || a.action_type.startsWith('submission_'), 
+                                 'bg-orange': a.action_type.startsWith('member_') || a.action_type.startsWith('workspace_'), 
+                                 'bg-green': a.action_type.startsWith('announcement_')}">
+                  {{ getActivityIcon(a.action_type) }}
                 </div>
-                <button class="icon-btn" style="color: #ef4444; opacity: 0.7; margin-top: 0.2rem;" 
-                        *ngIf="isOwner || a.user_id === currentUserId" 
-                        (click)="deleteActivity(a)" title="Aktiviteyi Sil">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
+                
+                <div class="ap-item-card">
+                  <div class="ap-item-header">
+                    <div class="ap-user">
+                      <div class="ap-avatar">{{ (a.user_name || '?').charAt(0).toUpperCase() }}</div>
+                      <span class="ap-username">{{ a.user_name || 'Bilinmeyen Kullanıcı' }}</span>
+                    </div>
+                    <span class="ap-time">{{ a.created_at | date:'HH:mm' }}</span>
+                  </div>
+                  
+                  <div class="ap-item-body">
+                    <p>{{ a.description }}</p>
+                  </div>
+                </div>
+                
+                <button class="icon-btn btn-delete-ap" *ngIf="isOwner || a.user_id === currentUserId" (click)="deleteActivity(a)" title="Aktiviteyi Sil">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
+                
               </div>
             </div>
           </div>
+          
         </div>
-      </div>
-
-    </div>
+      </div>    </div>
   </main>
 </div>
 
 <!-- Task Create Modal -->
-<div class="modal-overlay" *ngIf="showTaskModal" (click)="showTaskModal = false"
-  style="position: fixed; inset: 0; background: rgba(15,23,42,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000;">
-  <div class="card" (click)="$event.stopPropagation()" style="width: 100%; max-width: 500px; margin: 1rem;">
-    <div class="card-header d-flex justify-between align-center"
-      style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0; margin: 0;">
+<div class="modal-overlay" *ngIf="showTaskModal" (click)="showTaskModal = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
       <h2 style="margin: 0; font-size: 1.25rem;">Yeni Görev</h2>
       <button class="btn-ghost" (click)="showTaskModal = false"
         style="padding: 0; font-size: 1.5rem; line-height: 1;">&times;</button>
     </div>
-    <div class="card-body" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+    <div class="modal-body">
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         <label style="font-weight: 500; font-size: 0.9rem;">Başlık</label>
         <input type="text" [(ngModel)]="newTaskTitle" placeholder="Örn: Hafta 1 Ödevi"
@@ -418,7 +793,7 @@
           style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem;" />
       </div>
     </div>
-    <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 1rem;">
+    <div class="modal-footer">
       <button class="btn-ghost" (click)="showTaskModal = false">İptal</button>
       <button class="btn-primary" (click)="createTask()" [disabled]="!newTaskTitle.trim()">Oluştur</button>
     </div>
@@ -426,16 +801,14 @@
 </div>
 
 <!-- Edit Workspace Modal -->
-<div class="modal-overlay" *ngIf="showEditModal" (click)="showEditModal = false"
-  style="position: fixed; inset: 0; background: rgba(15,23,42,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000;">
-  <div class="card" (click)="$event.stopPropagation()" style="width: 100%; max-width: 480px; margin: 1rem;">
-    <div class="card-header d-flex justify-between align-center"
-      style="padding: 1.5rem; border-bottom: 1px solid #e2e8f0; margin: 0;">
+<div class="modal-overlay" *ngIf="showEditModal" (click)="showEditModal = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
       <h2 style="margin: 0; font-size: 1.25rem;">Çalışma Alanını Düzenle</h2>
       <button class="btn-ghost" (click)="showEditModal = false"
         style="padding: 0; font-size: 1.5rem; line-height: 1;">&times;</button>
     </div>
-    <div class="card-body" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+    <div class="modal-body">
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         <label style="font-weight: 500; font-size: 0.9rem;">Çalışma Alanı Adı</label>
         <input type="text" [(ngModel)]="editTitle" placeholder="Çalışma alanı adı giriniz"
@@ -451,7 +824,7 @@
         <label for="edit-ws-allow-uploads" style="font-weight: 500; font-size: 0.9rem; cursor: pointer;">Üyelerin Dosya Yüklemesine İzin Ver</label>
       </div>
     </div>
-    <div style="padding: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+    <div class="modal-footer" style="justify-content: space-between;">
       <button class="btn-danger" (click)="deleteWorkspace()" id="delete-ws-btn">Çalışma Alanını Sil</button>
       <div style="display: flex; gap: 1rem;">
         <button class="btn-ghost" (click)="showEditModal = false">İptal</button>
